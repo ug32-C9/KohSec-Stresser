@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-let activeTest = null;
+let activeKohSec = null;
 
 const uaPresets = {
     windows: [
@@ -41,8 +41,8 @@ function getRandomUA(profile) {
 }
 
 app.post('/api/start', (req, res) => {
-    if (activeTest) {
-        return res.status(400).json({ error: 'Test already running' });
+    if (activeKohSec) {
+        return res.status(400).json({ error: 'KohSec-Tool already running' });
     }
 
     let { target, threads, duration, uaProfile, customUA, payload } = req.body;
@@ -68,39 +68,39 @@ app.post('/api/start', (req, res) => {
 
     console.log(`[START] ${target} | threads:${threads} | dur:${duration}s | ua:${uaProfile}`);
 
-    activeTest = {
+    activeKohSec = {
         running: true,
         startTime: Date.now(),
-         requestsSent: 0,
-         errors: 0,
-         endTime: Date.now() + duration * 1000
+        requestsSent: 0,
+        errors: 0,
+        endTime: Date.now() + duration * 1000
     };
 
     const protocol = targetUrl.protocol === 'https:' ? https : http;
 
     function sendRequest() {
-        if (!activeTest?.running || Date.now() >= activeTest.endTime) return;
+        if (!activeKohSec?.running || Date.now() >= activeKohSec.endTime) return;
 
         const options = {
             hostname: targetUrl.hostname,
             port: targetUrl.port || (targetUrl.protocol === 'https:' ? 443 : 80),
-         path: targetUrl.pathname + targetUrl.search,
-         method: payload ? 'POST' : 'GET',
-         headers: {
-             'User-Agent': customUA || getRandomUA(uaProfile) || uaPresets.windows[0],
-         'Connection': 'keep-alive',
-         ...(payload ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } : {})
-         }
+            path: targetUrl.pathname + targetUrl.search,
+            method: payload ? 'POST' : 'GET',
+            headers: {
+                'User-Agent': customUA || getRandomUA(uaProfile) || uaPresets.windows[0],
+                'Connection': 'keep-alive',
+                ...(payload ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } : {})
+            }
         };
 
         const req = protocol.request(options, (res) => {
-            res.on('data', () => {});
-            activeTest.requestsSent++;
+            res.on('data', () => { });
+            activeKohSec.requestsSent++;
         });
 
         req.on('error', () => {
-            activeTest.errors++;
-            activeTest.requestsSent++;
+            activeKohSec.errors++;
+            activeKohSec.requestsSent++;
         });
 
         if (payload) req.write(payload);
@@ -116,9 +116,9 @@ app.post('/api/start', (req, res) => {
 
     // Auto-stop safety
     setTimeout(() => {
-        if (activeTest) {
-            activeTest.running = false;
-            activeTest = null;
+        if (activeKohSec) {
+            activeKohSec.running = false;
+            activeKohSec = null;
             console.log('[AUTO-STOP] Safety timeout');
         }
     }, duration * 1000 + 10000);
@@ -127,10 +127,10 @@ app.post('/api/start', (req, res) => {
 });
 
 app.post('/api/stop', (req, res) => {
-    if (activeTest) {
-        activeTest.running = false;
-        const wasSent = activeTest.requestsSent;
-        activeTest = null;
+    if (activeKohSec) {
+        activeKohSec.running = false;
+        const wasSent = activeKohSec.requestsSent;
+        activeKohSec = null;
         console.log(`[STOP] Aborted – ${wasSent} requests sent`);
         return res.json({ status: 'stopped' });
     }
@@ -138,9 +138,9 @@ app.post('/api/stop', (req, res) => {
 });
 
 app.get('/api/status', (req, res) => {
-    res.json(activeTest || { running: false, requestsSent: 0, errors: 0 });
+    res.json(activeKohSec || { running: false, requestsSent: 0, errors: 0 });
 });
 
 app.listen(port, () => {
-    console.log(`KOHSEC Stress Tool → http://localhost:${port}`);
+    console.log(`KOHSEC Stress Tool → https://kohsec-stresser.onrender.com`);
 });
