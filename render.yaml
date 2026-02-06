@@ -1,0 +1,12 @@
+# Render Blueprint specification
+# https://docs.render.com/blueprint-spec
+
+services:
+  - type: web
+    name: KohSec-Tool
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
