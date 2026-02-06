@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('flood-form');
     const uaSelect = document.getElementById('ua-profile');
     const customRow = document.getElementById('custom-ua-row');
+    const proxyFile = document.getElementById('proxy-file');
+    const proxyCount = document.getElementById('proxy-count');
+    const clearProxies = document.getElementById('clear-proxies');
+
+    let loadedProxies = '';
 
     agree.addEventListener('change', () => {
         startBtn.disabled = !agree.checked;
@@ -15,6 +20,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     uaSelect.addEventListener('change', () => {
         customRow.style.display = uaSelect.value === 'custom' ? 'block' : 'none';
+    });
+
+    // Handle proxy file upload
+    proxyFile.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const lines = text.split(/\r?\n/).filter(line => {
+                const trimmed = line.trim();
+                return trimmed && !trimmed.startsWith('#');
+            });
+
+            loadedProxies = text;
+            const httpCount = lines.filter(l => l.includes('http://')).length;
+            const socksCount = lines.filter(l => l.includes('socks')).length;
+
+            proxyCount.textContent = `✓ ${lines.length} proxies loaded (${httpCount} HTTP, ${socksCount} SOCKS)`;
+            proxyCount.classList.add('loaded');
+            clearProxies.style.display = 'inline-block';
+        } catch (err) {
+            proxyCount.textContent = 'Error reading file';
+            proxyCount.classList.remove('loaded');
+            loadedProxies = '';
+        }
+    });
+
+    // Clear proxies
+    clearProxies.addEventListener('click', () => {
+        loadedProxies = '';
+        proxyFile.value = '';
+        proxyCount.textContent = 'No proxies loaded';
+        proxyCount.classList.remove('loaded');
+        clearProxies.style.display = 'none';
     });
 
     form.addEventListener('submit', async e => {
@@ -27,7 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
             duration: document.getElementById('duration').value,
             uaProfile: uaSelect.value,
             customUA: uaSelect.value === 'custom' ? document.getElementById('custom-ua').value.trim() : '',
-            payload: document.getElementById('payload').value.trim()
+            payload: document.getElementById('payload').value.trim(),
+            proxyList: loadedProxies
         };
 
         startBtn.disabled = true;
@@ -41,8 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            if (!r.ok) throw new Error(await r.text());
-            status.textContent = 'KOHSEC TOOL RUNNING...';
+            const result = await r.json();
+            if (!r.ok) throw new Error(result.error || 'Failed to start');
+
+            const proxyInfo = result.proxiesLoaded > 0 ? ` (${result.proxiesLoaded} proxies)` : ' (direct)';
+            status.textContent = `KOHSEC TOOL RUNNING${proxyInfo}...`;
         } catch (err) {
             status.textContent = 'Error: ' + err.message;
             status.className = 'status-box error';
@@ -66,10 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const s = await r.json();
             if (s.running) {
                 const elapsed = ((Date.now() - s.startTime) / 1000).toFixed(1);
+                const proxyLine = s.proxyCount > 0
+                    ? `Proxies: ${s.proxyCount} | Rotations: ${s.proxyRotations || 0}\n`
+                    : '';
                 stats.innerHTML =
-                    `Running: ${elapsed}s / ${s.duration || '?'}s\n` +
+                    `Running: ${elapsed}s\n` +
                     `Requests: ${s.requestsSent.toLocaleString()}\n` +
-                    `Errors: ${s.errors || 0}`;
+                    `Errors: ${s.errors || 0}\n` +
+                    proxyLine;
             } else {
                 stats.innerHTML = '';
             }

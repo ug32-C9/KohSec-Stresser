@@ -352,11 +352,97 @@ button:hover:not(:disabled) {
   box-shadow: 0 0 0 1px rgba(255, 100, 100, 0.4);
 }
 
+/* Proxy file upload styles */
+.file-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.file-upload-wrapper input[type="file"] {
+  padding: 12px 14px;
+  background: #0c0f14;
+  border: 1px dashed #3a4a5f;
+  border-radius: 12px;
+  color: var(--text);
+  cursor: pointer;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+.file-upload-wrapper input[type="file"]:hover {
+  border-color: var(--accent-2);
+  background: rgba(76, 201, 200, 0.05);
+}
+
+.file-upload-wrapper input[type="file"]::file-selector-button {
+  background: linear-gradient(135deg, #3a4a5f, #2a3a4f);
+  color: var(--text);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-right: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.file-upload-wrapper input[type="file"]::file-selector-button:hover {
+  background: linear-gradient(135deg, #4a5a6f, #3a4a5f);
+}
+
+.file-upload-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#proxy-count {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-family: "JetBrains Mono", monospace;
+}
+
+#proxy-count.loaded {
+  color: var(--success);
+}
+
+.btn-small {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  background: rgba(255, 100, 100, 0.2);
+  color: var(--danger);
+  border: 1px solid rgba(255, 100, 100, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-small:hover {
+  background: rgba(255, 100, 100, 0.35);
+}
+
+.field-hint {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.field-hint code {
+  background: rgba(76, 201, 200, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  color: var(--accent-2);
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -364,10 +450,12 @@ button:hover:not(:disabled) {
 }
 
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(18px);
   }

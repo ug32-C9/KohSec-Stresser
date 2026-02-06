@@ -26,6 +26,7 @@
         <span class="chip">Audit-first</span>
         <span class="chip">Scoped targets</span>
         <span class="chip">Live telemetry</span>
+        <span class="chip">Proxy rotation</span>
       </div>
     </header>
 
@@ -96,6 +97,19 @@
             <label>Payload (optional – POST body, leave empty for GET flood)</label>
             <textarea id="payload" rows="3"
               placeholder='{"key":"value"}  or  username=admin&pass=123  or raw text'></textarea>
+          </div>
+
+          <div class="field">
+            <label>Proxy List <span>(optional – upload proxies.txt for rotation)</span></label>
+            <div class="file-upload-wrapper">
+              <input type="file" id="proxy-file" accept=".txt">
+              <div class="file-upload-info">
+                <span id="proxy-count">No proxies loaded</span>
+                <button type="button" id="clear-proxies" class="btn-small" style="display:none;">Clear</button>
+              </div>
+            </div>
+            <p class="field-hint">Format: <code>http://ip:port</code> or <code>socks4://ip:port</code> (one per line)
+            </p>
           </div>
 
           <div class="buttons">
