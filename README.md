@@ -2,7 +2,7 @@
 
 **For authorized penetration testing and stress testing only**
 
-![KOHSEC Banner](assets/Banner.jpg)  
+<img src="assets/Banner.jpg" alt="KOHSEC Banner" width="800" style="max-width: 100%; height: auto;" />  
 *(Ethical and controlled use — educational / authorized penetration testing tool)*
 
 ## ⚠️ Critical Legal & Ethical Warning — Read Before Use
